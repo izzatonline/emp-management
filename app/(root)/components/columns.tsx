@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { Delete, Edit } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 
 export type Employee = {
@@ -55,7 +55,7 @@ export function getColumns(
       cell: ({ row }) => {
         const isActive = row.original.isActive;
         return (
-          <div className="flex justify-center">
+          <div className="flex justify-start">
             {/* Desktop View */}
             <div className="hidden sm:block">
               <Badge
@@ -86,7 +86,9 @@ export function getColumns(
         <Image
           src={row.original.avatar}
           alt={`${row.original.first_name} ${row.original.last_name}`}
-          className="w-10 h-10 rounded-full"
+          width={40}
+          height={40}
+          className="rounded-full"
         />
       ),
     },
@@ -99,7 +101,7 @@ export function getColumns(
             <Edit fontSize="medium" />
           </button>
           <button onClick={() => handleDelete(row.original)}>
-            <Delete fontSize="medium" color="error" />
+            <Trash fontSize="medium" color="red" />
           </button>
         </div>
       ),

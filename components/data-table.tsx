@@ -22,6 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AddEmployee } from "./add-modal";
+import { Employee } from "@/app/(root)/components/columns";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,9 +34,11 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [addModalOpen, setAddModalOpen] = React.useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -46,18 +50,44 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
+  const handleAddNewEmployee = (newEmployee) => {
+    console.log("Adding new employee:", newEmployee);
+    const newId =
+      employees.length > 0
+        ? Math.max(...employees.map((emp) => emp.id)) + 1
+        : 1;
+    const employeeToAdd = { ...newEmployee, id: newId };
+    console.log("Employee to add:", employeeToAdd);
+
+    setEmployees((currentEmployees) => [...currentEmployees, employeeToAdd]);
+    console.log("New employees list:", [...employees, employeeToAdd]);
+  };
 
   return (
     <div>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Search name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+      <AddEmployee
+        onAdd={handleAddNewEmployee}
+        open={addModalOpen}
+        setOpen={setAddModalOpen}
+      />
+      <div className="flex justify-between w-full">
+        <div className="flex items-center py-4">
+          <Input
+            placeholder="Search name..."
+            value={
+              (table.getColumn("first_name")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("first_name")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+        <div className="flex items-center py-4">
+          <Button onClick={() => setAddModalOpen(true)}>
+            Add New Employee
+          </Button>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>

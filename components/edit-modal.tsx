@@ -1,4 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Employee } from "@/app/(root)/components/columns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,17 +14,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useForm, Controller } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Employee } from "@/app/(root)/components/columns";
+import Image from "next/image";
 
 const employeeSchema = z.object({
-  name: z.string(),
+  first_name: z.string(),
+  last_name: z.string(),
   email: z.string().email(),
   isActive: z.boolean(),
+  age: z.number(),
+  salary: z.number(),
+  avatar: z.string().optional(),
 });
 
 export function EditEmployee({
@@ -34,42 +38,68 @@ export function EditEmployee({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
+  const [avatarFile, setAvatarFile] = useState(null);
+
   const form = useForm({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
-      name: "",
+      first_name: "",
+      last_name: "",
       email: "",
       isActive: false,
+      age: 0,
+      salary: 0,
+      avatar: "",
     },
   });
 
   useEffect(() => {
     form.reset({
-      name: employee.name,
+      first_name: employee.first_name,
+      last_name: employee.last_name,
       email: employee.email,
       isActive: employee.isActive,
+      age: employee.age,
+      salary: employee.salary,
+      avatar: employee.avatar,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [employee]);
+  }, [employee, form.reset]);
 
-  const onSubmit = (data: z.infer<typeof employeeSchema>) => {
-    const updatedEmployeeData = {
-      ...data,
-      id: employee.id,
-    };
-    onSave(updatedEmployeeData as Employee);
-    setOpen(false);
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarFile(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleClose = () => {
+  const { errors } = form.formState;
+  useEffect(() => {
+    console.log("Form Errors:", errors);
+  }, [errors]);
+
+  const onSubmit = (data) => {
+    console.log("Submitting Form Data:", data);
+    const updatedEmployeeData = {
+      ...employee,
+      ...data,
+      avatar: avatarFile || employee.avatar,
+    };
+    onSave(updatedEmployeeData);
+    if (avatarFile) {
+      localStorage.setItem(`avatar_${updatedEmployeeData.id}`, avatarFile);
+    }
     setOpen(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <DialogHeader className="items-start text-left">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
             <DialogTitle>Edit Employee</DialogTitle>
             <DialogDescription>
               Make changes to the employee details here. Click save when
@@ -77,58 +107,82 @@ export function EditEmployee({
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            <DialogTitle>First Name</DialogTitle>
             <Controller
-              name="name"
+              name="first_name"
               control={form.control}
               render={({ field }) => (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-left">
-                    Name
-                  </Label>
-                  <Input {...field} id="name" className="col-span-3" />
-                </div>
+                <Input {...field} id="first_name" className="col-span-3" />
               )}
             />
+            <DialogTitle>Last Name</DialogTitle>
+            <Controller
+              name="last_name"
+              control={form.control}
+              render={({ field }) => (
+                <Input {...field} id="last_name" className="col-span-3" />
+              )}
+            />
+            <DialogTitle>Email</DialogTitle>
             <Controller
               name="email"
               control={form.control}
               render={({ field }) => (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-left">
-                    Email
-                  </Label>
-                  <Input {...field} id="email" className="col-span-3" />
-                </div>
+                <Input {...field} id="email" className="col-span-3" />
               )}
             />
+            <DialogTitle>Age</DialogTitle>
             <Controller
-              name="isActive"
+              name="age"
               control={form.control}
-              render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="status" className="text-left">
-                    Status
-                  </Label>
-                  <Switch
-                    id="status"
-                    checked={value}
-                    onCheckedChange={onChange}
-                    onBlur={onBlur}
-                    name={name}
-                    ref={ref}
-                  />
-                </div>
+              render={({ field }) => (
+                <Input {...field} id="age" className="col-span-3" />
               )}
             />
+            <DialogTitle>Salary</DialogTitle>
+            <Controller
+              name="salary"
+              control={form.control}
+              render={({ field }) => (
+                <Input {...field} id="salary" className="col-span-3" />
+              )}
+            />
+            <div className="flex justify-between">
+              <DialogTitle>Status</DialogTitle>
+              <Controller
+                name="isActive"
+                control={form.control}
+                render={({ field }) => <Switch {...field} id="status" />}
+              />
+            </div>
+
+            {/* Avatar Upload */}
+            <div className="flex gap-2">
+              <DialogTitle>Avatar</DialogTitle>
+              <input type="file" id="avatar" onChange={handleAvatarChange} />
+              {avatarFile && (
+                <Image
+                  src={avatarFile}
+                  alt="Avatar"
+                  className="w-20 h-20 rounded-full"
+                  width={40}
+                  height={40}
+                />
+              )}
+            </div>
           </div>
-          <DialogFooter className="gap-2">
+          <DialogFooter>
             <Button type="submit">Save changes</Button>
-            <Button type="button" onClick={handleClose} variant="destructive">
+            <Button
+              type="button"
+              onClick={() => setOpen(false)}
+              variant="destructive"
+            >
               Cancel
             </Button>
           </DialogFooter>
-        </form>
-      </DialogContent>
+        </DialogContent>
+      </form>
     </Dialog>
   );
 }

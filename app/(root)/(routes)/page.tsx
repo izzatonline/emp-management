@@ -6,6 +6,7 @@ import { DataTable } from "@/components/data-table";
 import { EditEmployee } from "@/components/edit-modal";
 import { DeleteEmployee } from "@/components/delete-modal";
 import Header from "@/components/header";
+import { AddEmployee } from "@/components/add-modal";
 
 export default function Home() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -15,6 +16,7 @@ export default function Home() {
     null
   );
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -31,12 +33,30 @@ export default function Home() {
   };
 
   const handleSave = (updatedEmployee: Employee) => {
+    console.log("handleSave called with:", updatedEmployee);
     const newEmployees = employees.map((emp) =>
       emp.id === updatedEmployee.id ? updatedEmployee : emp
     );
     setEmployees(newEmployees);
     setEditingEmployee(null);
     setEditModalOpen(false);
+  };
+
+  useEffect(() => {
+    console.log("Updated Employees:", employees);
+  }, [employees]);
+
+  const handleAddNewEmployee = (newEmployee) => {
+    console.log("Adding new employee:", newEmployee);
+    const newId =
+      employees.length > 0
+        ? Math.max(...employees.map((emp) => emp.id)) + 1
+        : 1;
+    const employeeToAdd = { ...newEmployee, id: newId };
+    console.log("Employee to add:", employeeToAdd);
+
+    setEmployees((currentEmployees) => [...currentEmployees, employeeToAdd]);
+    console.log("New employees list:", [...employees, employeeToAdd]);
   };
 
   const handleDeleteRequest = (employee: Employee) => {
@@ -67,6 +87,11 @@ export default function Home() {
             setOpen={setEditModalOpen}
           />
         )}
+        <AddEmployee
+          onAdd={handleAddNewEmployee}
+          open={addModalOpen}
+          setOpen={setAddModalOpen}
+        />
         <DeleteEmployee
           open={deleteModalOpen}
           onClose={() => setDeleteModalOpen(false)}
