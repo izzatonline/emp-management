@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 
 const employeeSchema = z.object({
+  id: z.number(),
   first_name: z.string(),
   last_name: z.string(),
   email: z.string().email(),
@@ -43,6 +44,7 @@ export function EditEmployee({
   const form = useForm({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
+      id: 0,
       first_name: "",
       last_name: "",
       email: "",

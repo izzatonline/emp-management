@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Employee } from "@/app/(root)/components/columns";
 
 const employeeSchema = z.object({
+  id: z.number(),
   first_name: z.string(),
   last_name: z.string(),
   email: z.string().email(),
@@ -39,6 +40,7 @@ export function AddEmployee({
   const form = useForm({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
+      id: 0,
       first_name: "",
       last_name: "",
       email: "",
