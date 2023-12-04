@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Employee } from "@/app/(root)/components/columns";
 
 const employeeSchema = z.object({
   first_name: z.string(),
@@ -48,7 +49,7 @@ export function AddEmployee({
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: Employee) => {
     console.log("Submitting Form Data:", data);
     onAdd(data);
     setOpen(false);

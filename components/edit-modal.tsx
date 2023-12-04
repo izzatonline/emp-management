@@ -65,7 +65,7 @@ export function EditEmployee({
     });
   }, [employee, form.reset]);
 
-  const handleAvatarChange = async (event) => {
+  const handleAvatarChange = async (event: Employee) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -81,7 +81,7 @@ export function EditEmployee({
     console.log("Form Errors:", errors);
   }, [errors]);
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: Employee) => {
     console.log("Submitting Form Data:", data);
     const updatedEmployeeData = {
       ...employee,
