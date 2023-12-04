@@ -46,7 +46,7 @@ export default function Home() {
     console.log("Updated Employees:", employees);
   }, [employees]);
 
-  const handleAddNewEmployee = (newEmployee) => {
+  const handleAddNewEmployee = (newEmployee: Employee) => {
     console.log("Adding new employee:", newEmployee);
     const newId =
       employees.length > 0
